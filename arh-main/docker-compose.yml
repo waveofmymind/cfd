@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  db-mysql:
+    image: mysql:latest
+    hostname: db-mysql
+    container_name: db-mysql
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: waveofmymind
+      MYSQL_PASSWORD: 0913
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+  app:
+    container_name: app
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - db-mysql
+    command:
+      - bash
+      - -c
+      - |
+        ./wait-for-it.sh db-mysql:3306 -s -t 100
+        java -jar /app.jar
